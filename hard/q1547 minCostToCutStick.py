@@ -37,6 +37,8 @@ class Solution:
             for cut in cuts:
                 if start < cut < end:
                     canCut = True
+                    
+                    # top down DP because we solve these sub problems on the way and not beforehand
                     ans = min(ans, dp(start, cut) + dp(cut, end) + end - start)
             
             if not canCut:
