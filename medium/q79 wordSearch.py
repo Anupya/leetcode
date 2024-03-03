@@ -1,54 +1,59 @@
-# Given an m x n grid of characters board and a string word, return true if word exists in the grid.
+"""
+Given an m x n grid of characters board and a string word, return true if word exists in the grid.
 
-# The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once.
+The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once.
+"""
+from typing import List
 
 class Solution:
-    def traverse (self, board, word, x, y, visited):
-
-        if len(word) == 0:
+    def findWord(self, board: List[List[str]], word: str, visited: List[List[bool]], row: int, col: int) -> bool:
+        if not word:
             return True
         
-        left, right, up, down = False, False, False, False
-        
-        # up
-        if x-1 >= 0 and board[x-1][y] == word[0] and (x-1, y) not in visited:
-            visited.add((x-1, y))
-            up = self.traverse(board, word[1:], x-1, y, visited)
-            visited.remove((x-1, y))
-    
-        # down
-        if x+1 < len(board) and board[x+1][y] == word[0] and (x+1, y) not in visited:
-            visited.add((x+1, y))
-            down = self.traverse(board, word[1:], x+1, y, visited)
-            visited.remove((x+1, y))
-        
-        # left
-        if y-1 >= 0 and board[x][y-1] == word[0] and (x, y-1) not in visited:
-            visited.add((x, y-1))
-            left = self.traverse(board, word[1:], x, y-1, visited)
-            visited.remove((x, y-1))
-        
-        # right
-        if y+1 < len(board[0]) and board[x][y+1] == word[0] and (x, y+1) not in visited:
-            visited.add((x, y+1))
-            right = self.traverse(board, word[1:], x, y+1, visited)
-            visited.remove((x, y+1))
-        
-        return True if left or right or up or down else False
-        
-    
+        numRows = len(board)
+        numCols = len(board[0])
+
+        doesWordExist = False
+
+        # go right
+        if col+1 < numCols and not visited[row][col+1] and board[row][col+1] == word[0]:
+            visited[row][col+1] = True
+            doesWordExist = doesWordExist or self.findWord(board, word[1:], visited, row, col+1)
+            visited[row][col+1] = False
+
+        # go left
+        if col > 0 and not visited[row][col-1] and board[row][col-1] == word[0]:
+            visited[row][col-1] = True
+            doesWordExist = doesWordExist or self.findWord(board, word[1:], visited, row, col-1)
+            visited[row][col-1] = False
+
+        # go up
+        if row > 0 and not visited[row-1][col] and board[row-1][col] == word[0]:
+            visited[row-1][col] = True
+            doesWordExist = doesWordExist or self.findWord(board, word[1:], visited, row-1, col)
+            visited[row-1][col] = False
+
+        # go down
+        if row+1 < numRows and not visited[row+1][col] and board[row+1][col] == word[0]:
+            visited[row+1][col] = True
+            doesWordExist = doesWordExist or self.findWord(board, word[1:], visited, row+1, col)
+            visited[row+1][col] = False
+
+        return doesWordExist
+
     def exist(self, board: List[List[str]], word: str) -> bool:
-        
-        for x in range(len(board)):
-            for y in range(len(board[0])):
-                
-                if board[x][y] == word[0]:
-                    visited = set()
-                    visited.add((x, y))
-                    found = self.traverse(board, word[1:], x, y, visited)
-                    if found:
+        lenBoard = len(board)
+        lenCol = len(board[0])
+        visited = [[False for y in range(lenCol)] for x in range(lenBoard)]
+
+        for row in range(lenBoard):
+            for col in range(lenCol):
+                if board[row][col] == word[0]:
+                    visited[row][col] = True
+                    if self.findWord(board, word[1:], visited, row, col):
                         return True
-        
+
+                    visited[row][col] = False
+
         return False
-        
-        
+                    
